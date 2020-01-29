@@ -1,0 +1,89 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:library", "library")
+#@ load("@ytt:template", "template")
+#@ load("@ytt:overlay", "overlay")
+
+#@ def capi_values():
+image:
+  repository: #@ data.values.images.capi
+#! TODO: remove
+nginx:
+  image:
+    repository: #@ data.values.images.nginx
+
+system_domain: #@ data.values.system_domain
+#! TODO: fix app domains
+app_domains:
+#@overlay/append
+- fresno.dev.relint.rocks
+
+ccdb:
+  adapter: #@ data.values.capi.database.adapter
+  host: #@ data.values.capi.database.host
+  port: #@ data.values.capi.database.port
+  user: #@ data.values.capi.database.user
+  password: #@ data.values.capi.database.password
+  database: #@ data.values.capi.database.name
+
+eirini:
+  serverCerts:
+    secretName: eirini-internal-tls-certs
+
+apiServer:
+  opi:
+    client_cert: #@ data.values.eirini.tls.crt
+    client_key: #@ data.values.eirini.tls.key
+    ca: #@ data.values.system_certificate.ca
+
+uaa:
+  serverCerts:
+    secretName: uaa-certs
+  clients:
+    cloud_controller_username_lookup:
+      secret: #@ data.values.uaa.admin_client_secret
+#@ end
+
+#@ capi = library.get("github.com/cloudfoundry/capi-k8s-release")
+--- #@ template.replace(capi.with_data_values(capi_values()).eval())
+
+#! TODO: PR CAPI to make images configurable instead of hardcoded
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"capi-api-server"}})
+---
+spec:
+  template:
+    spec:
+      initContainers:
+      #@overlay/match by="name"
+      - name: pre-start
+        image: #@ data.values.images.capi
+      containers:
+      #@overlay/match by="name"
+      - name: capi-api-server
+        image: #@ data.values.images.capi
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"capi-worker"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by="name"
+      - name: capi-worker
+        image: #@ data.values.images.capi
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"capi-clock"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by="name"
+      - name: capi-clock
+        image: #@ data.values.images.capi
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"capi-deployment-updater"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by="name"
+      - name: capi-deployment-updater
+        image: #@ data.values.images.capi

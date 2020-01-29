@@ -10,6 +10,10 @@ directories:
         envs...'
       sha: b4375d0b13cb853ee402a9530b54188772c24ff6
     path: github.com/cloudfoundry/cf-k8s-networking
+  - git:
+      commitTitle: Use fully-namespace-qualified urls for uaa/eirini...
+      sha: 4ec231cbbabbe0a90ac25c0b49daa2b407df85c6
+    path: github.com/cloudfoundry/capi-k8s-release
   - manual: {}
     path: istio
   - manual: {}
