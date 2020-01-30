@@ -30,18 +30,18 @@ system_certificate:
 uaa:
   admin_client_secret: uaaadminclientsecret
   certificate:
-    #! This certificate should be valid for uaa.cf-system.svc.cluster.local
-    crt: *crt
-    key: *key
+    #! This certificate should be valid for uaa.cf-system.svc.cluster.local and signed with the same ca as in system_certificate.ca
+    crt: &cluster_crt
+    key: &cluster_key
 
 doppler:
   tls:
-    #! This certificate should be valid for doppler.cf-system.svc.cluster.local
-    crt: *crt
-    key: *key
+    #! This certificate should be valid for doppler.cf-system.svc.cluster.local and signed with the same ca as in system_certificate.ca
+    crt: *cluster_crt
+    key: *cluster_key
 
 eirini:
   tls:
-    #! This certificate should be valid for eirini.cf-system.svc.cluster.local
-    crt: *crt
-    key: *key
+    #! This certificate should be valid for eirini.cf-system.svc.cluster.local and signed with the same ca as in system_certificate.ca
+    crt: *cluster_crt
+    key: *cluster_key
